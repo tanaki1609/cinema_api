@@ -2,7 +2,9 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
 from .models import Film
-from .serializers import FilmListSerializer, FilmDetailSerializer
+from .serializers import (FilmListSerializer,
+                          FilmDetailSerializer,
+                          FilmValidateSerializer)
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
@@ -16,13 +18,16 @@ def film_detail_api_view(request, id):
         item = FilmDetailSerializer(film, many=False).data
         return Response(data=item, status=status.HTTP_200_OK)
     elif request.method == 'PUT':
-        film.title = request.data.get('title')
-        film.text = request.data.get('text')
-        film.rating = request.data.get('rating')
-        film.is_hit = request.data.get('is_hit')
-        film.release_year = request.data.get('release_year')
-        film.director_id = request.data.get('director_id')
-        film.genres.set(request.data.get('genres'))
+        serializer = FilmValidateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        film.title = serializer.validated_data.get('title')
+        film.text = serializer.validated_data.get('text')
+        film.rating = serializer.validated_data.get('rating')
+        film.is_hit = serializer.validated_data.get('is_hit')
+        film.release_year = serializer.validated_data.get('release_year')
+        film.director_id = serializer.validated_data.get('director_id')
+        film.genres.set(serializer.validated_data.get('genres'))
         film.save()
         return Response(status=status.HTTP_201_CREATED,
                         data=FilmDetailSerializer(film).data)
@@ -46,13 +51,21 @@ def film_list_create_api_view(request):
             status=status.HTTP_200_OK,  # int (100, 200, 300, 400, 500)
         )
     elif request.method == 'POST':
-        title = request.data.get('title')
-        description = request.data.get('text')
-        release_year = request.data.get('release_year')
-        rating = request.data.get('rating')
-        is_hit = request.data.get('is_hit')
-        director_id = request.data.get('director_id')
-        genres = request.data.get('genres')
+        # Validation (Existing, Typing, Extra)
+        print("Некорректные:", request.data)
+        serializer = FilmValidateSerializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(status=status.HTTP_400_BAD_REQUEST,
+                            data=serializer.errors)
+        print("Исправленные:", serializer.validated_data)
+
+        title = serializer.validated_data.get('title')  # None
+        description = serializer.validated_data.get('text')
+        release_year = serializer.validated_data.get('release_year')
+        rating = serializer.validated_data.get('rating')
+        is_hit = serializer.validated_data.get('is_hit')  # "Y"
+        director_id = serializer.validated_data.get('director_id')
+        genres = serializer.validated_data.get('genres')
 
         film = Film.objects.create(
             title=title,
