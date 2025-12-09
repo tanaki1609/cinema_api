@@ -38,6 +38,7 @@ def film_detail_api_view(request, id):
 
 @api_view(http_method_names=['GET', 'POST'])
 def film_list_create_api_view(request):
+    print(request.user)
     if request.method == 'GET':
         # step 1: Collect films from DB (QuerySet)
         films = Film.objects.select_related('director').prefetch_related('genres', 'reviews').all()

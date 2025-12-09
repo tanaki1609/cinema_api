@@ -37,7 +37,10 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'films',
+    'users',
+    'rest_framework.authtoken'
 ]
+
 QUERYCOUNT = {
     'THRESHOLDS': {
         'MEDIUM': 50,
@@ -50,6 +53,13 @@ QUERYCOUNT = {
     'DISPLAY_DUPLICATES': None,
     'RESPONSE_HEADER': 'X-DjangoQueryCount-Count'
 }
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.TokenAuthentication',
+    ]
+}
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
