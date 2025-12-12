@@ -1,10 +1,50 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Film
+from .models import Film, Director, Genre
 from .serializers import (FilmListSerializer,
                           FilmDetailSerializer,
-                          FilmValidateSerializer)
+                          FilmValidateSerializer,
+                          DirectorSerializer,
+                          GenreSerializer,
+                          DirectorCreateSerializer)
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.viewsets import ModelViewSet
+
+
+class CustomPagination(PageNumberPagination):
+    def get_paginated_response(self, data):
+        return Response({
+            'total': self.page.paginator.count,
+            'next': self.get_next_link(),
+            'previous': self.get_previous_link(),
+            'results': data,
+        })
+
+
+class DirectorListCreateAPIView(ListCreateAPIView):
+    queryset = Director.objects.all()  # list of data from DB
+    serializer_class = DirectorSerializer  # serializer inherited by ModelSerializer
+    pagination_class = CustomPagination
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return DirectorCreateSerializer
+        return self.serializer_class
+
+
+class DirectorDetailAPIView(RetrieveUpdateDestroyAPIView):
+    queryset = Director.objects.all()
+    serializer_class = DirectorSerializer
+    lookup_field = 'id'
+
+
+class GenreViewSet(ModelViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    pagination_class = CustomPagination
+    lookup_field = 'id'
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
