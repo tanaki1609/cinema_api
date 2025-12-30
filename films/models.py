@@ -18,7 +18,7 @@ class Genre(models.Model):
 
 class Film(models.Model):
     director = models.ForeignKey(Director, on_delete=models.CASCADE,
-                                 null=True)
+                                 null=True)  # director_id
     genres = models.ManyToManyField(Genre, blank=True)
     title = models.CharField(max_length=255)
     text = models.TextField(null=True, blank=True)
@@ -40,7 +40,7 @@ class Review(models.Model):
     text = models.TextField()
     stars = models.IntegerField(choices=((i, i) for i in range(1, 11)), default=7)
     film = models.ForeignKey(Film, on_delete=models.CASCADE,
-                             related_name='reviews')
+                             related_name='reviews')  # film_id
 
     def __str__(self):
         return self.text
