@@ -1,8 +1,50 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Film
-from .serializers import FilmListSerializer, FilmDetailSerializer, FilmValidateSerializer
+from .models import Film, Genre, Director
+from .serializers import (
+    FilmListSerializer,
+    FilmDetailSerializer,
+    FilmValidateSerializer,
+    GenreSerializer,
+    DirectorSerializer,
+    DirectorCreateSerializer
+)
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.viewsets import ModelViewSet
+
+
+class DirectorViewSet(ModelViewSet):
+    queryset = Director.objects.all()
+    serializer_class = DirectorSerializer
+    pagination_class = PageNumberPagination
+    lookup_field = 'id'
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return DirectorCreateSerializer
+        return self.serializer_class
+
+    # def create(self, request, *args, **kwargs):
+    #     serializer = DirectorCreateSerializer(data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #
+    #     director = Director.objects.create(**serializer.validated_data)
+    #     return Response(data=DirectorCreateSerializer(director).data,
+    #                     status=status.HTTP_201_CREATED)
+
+
+class GenreListAPIView(ListCreateAPIView):
+    queryset = Genre.objects.all()  # list of data from DB
+    serializer_class = GenreSerializer  # serializer class inherited by ModelSerializer
+    pagination_class = PageNumberPagination
+
+
+class GenreDetailAPIView(RetrieveUpdateDestroyAPIView):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    lookup_field = 'id'
 
 
 @api_view(['GET', 'PUT', 'DELETE'])
